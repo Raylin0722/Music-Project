@@ -1,5 +1,3 @@
-# main.py - 使用畫面類別管理的主程式架構
-
 import pygame
 import sys
 from font_manager import FontManager

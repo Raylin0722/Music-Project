@@ -5,6 +5,8 @@
     "langToggle": "Language Toggle",
     "start_screen": "Start Screen",
     "input_screen": "Input Screen",
-	"startTitle": "Music Project"
+	"startTitle": "Music Project",
+	"volume": "Volume",
+	"savePath": "Save Path"
 }
   

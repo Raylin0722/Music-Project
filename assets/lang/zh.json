@@ -1,9 +1,11 @@
 {
     "start": "開始",
-    "back": "上一頁",
+    "back": "返回",
     "settings": "設定",
     "langToggle": "語言切換",
     "start_screen": "開始頁面",
     "input_screen": "輸入頁面",
-	"startTitle": "音樂專題"
+	"startTitle": "音樂專題",
+	"volume": "音量",
+	"savePath": "儲存路徑"
 }
