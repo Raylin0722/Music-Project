@@ -3,6 +3,8 @@ import sys
 from font_manager import FontManager
 import lang_manager
 from screens.start_screen import StartScreen
+from screens.settings_screen import SettingsScreen
+import config_manager
 
 pygame.init()
 SCREEN_WIDTH, SCREEN_HEIGHT = 800, 600
@@ -17,6 +19,15 @@ current_screen = None
 # 畫面切換邏輯
 def switch_to_start():
     global current_screen
+
+    # 若從設定畫面回來，儲存目前設定
+    if isinstance(current_screen, SettingsScreen):
+        settings = current_screen.get_settings()
+        config_manager.set_config("volume", settings["volume"])
+        config_manager.set_config("save_path", settings["save_path"])
+        config_manager.save_config()
+        config_manager.apply_config()
+
     current_screen = StartScreen(
         font.get(lang_manager.LANGUAGE),
         switch_to_input,
@@ -36,7 +47,11 @@ def set_language_and_refresh():
     
     
 def switch_to_settings():
-    print("切換至設定畫面（待擴充）")
+    global current_screen
+    current_screen = SettingsScreen(
+        font.get(lang_manager.LANGUAGE),
+        switch_to_start
+    )
 
 # 啟動第一個畫面
 switch_to_start()
