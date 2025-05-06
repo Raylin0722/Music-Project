@@ -35,6 +35,9 @@ def switch_to_start():
         set_language_and_refresh
     )
 
+    print("目前音量：", config_manager.get_config("volume"))
+    print("目前存檔路徑：", config_manager.get_config("save_path"))
+
 def switch_to_input():
     print("切換至輸入畫面（待擴充）")
 
@@ -59,11 +62,14 @@ switch_to_start()
 # 主迴圈
 running = True
 while running:
+    
     screen.fill((240, 240, 240))
 
     for event in pygame.event.get():
+        
         if event.type == pygame.QUIT:
             running = False
+            config_manager.make_config_save_file()
         else:
             current_screen.handle_event(event)
 

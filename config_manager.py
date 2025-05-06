@@ -6,7 +6,10 @@ CONFIG_FILE = "config.json"
 
 default_config = {
     "volume": 50,
-    "save_path": "./output"
+    "save_path": "./output",
+    "width": 800,
+    "height": 600,
+    "fullscreen": False
 }
 
 current_config = default_config.copy()
@@ -30,3 +33,17 @@ def set_config(key, value):
 
 def get_config(key):
     return current_config.get(key, default_config[key])
+
+def make_auto_save_back(original_callback, slider, textinput, notify_text_fn=None):
+    def callback():
+        set_config("volume", slider.get_value())
+        set_config("save_path", textinput.get_text())
+        save_config()
+        if notify_text_fn:
+            notify_text_fn("Settings saved successfully!", duration=1.5)
+        original_callback()
+    print("Auto save complete!")
+    return callback
+
+def make_config_save_file():
+    save_config()

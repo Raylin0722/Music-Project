@@ -11,20 +11,20 @@ class SettingsScreen(Screen):
         super().__init__()
         self.font = font
         self.on_back = on_back
-
-        self.volume_slider = Slider(300, 200, 200, 0, 100, 50)
-        self.path_input = TextInput(300, 300, 300, font)
-
+        self.volume_slider = Slider(300, 200, 400, 0, 100, config_manager.get_config("volume"))
+        self.path_input = TextInput(300, 300, 400, font,config_manager.get_config("save_path"))
+        self.path_input.active = True
         self.buttons = [
-            Button(lang_manager.translate("back"), 300, 400, 200, 50, on_back, font)
+            Button(lang_manager.translate("back"), 300, 400, 200, 50, config_manager.make_auto_save_back, font)
         ]
-
+        
     def handle_event(self, event):
-        self.volume_slider.handle_event(event)
-        self.path_input.handle_event(event)
-        for b in self.buttons:
-            b.handle_event(event)   
 
+        self.volume_slider.handle_event(event)
+        self.path_input.handle_event(event)  # 暫時註解這一行
+
+        for b in self.buttons:
+            b.handle_event(event)
     def update(self, dt):
         pass  # 若有動畫效果可處理
 
@@ -45,7 +45,8 @@ class SettingsScreen(Screen):
         y += 60
 
         # 音量滑桿
-        self.volume_slider.rect.topleft = (300, y)
+        self.volume_slider.rect.centerx = screen.get_width() // 2
+        self.volume_slider.rect.y = y
         self.volume_slider.draw(screen)
         y += 60
 
@@ -55,7 +56,8 @@ class SettingsScreen(Screen):
         y += 60
 
         # 路徑輸入框
-        self.path_input.rect.topleft = (300, y)
+        self.path_input.rect.centerx = screen.get_width() // 2
+        self.path_input.rect.y = y
         self.path_input.draw(screen)
         y += 80
 
