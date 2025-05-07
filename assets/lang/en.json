@@ -7,6 +7,18 @@
     "input_screen": "Input Screen",
 	"startTitle": "Music Project",
 	"volume": "Volume",
-	"savePath": "Save Path"
+	"save_path": "Save Path",
+    "select_function": "Please select a function",
+    "MIDI_player": "MIDI Player",
+    "piano_simulator": "Piano Simulator",
+    "random_generator": "Random Generator",
+    "composition_feature": "Composition Feature",
+    "select_midi": "Select MIDI File",
+    "play": "Play",
+    "pause": "Pause",
+    "stop": "Stop",
+    "next": "Next",
+    "file_loaded": "File loaded",
+    "no_file_selected": "No file selected"
 }
   

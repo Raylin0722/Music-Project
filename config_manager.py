@@ -35,14 +35,17 @@ def get_config(key):
     return current_config.get(key, default_config[key])
 
 def make_auto_save_back(original_callback, slider, textinput, notify_text_fn=None):
+    print("[DEBUG] make_auto_save_back CALLED")
     def callback():
+        print("[DEBUG] auto-save BUTTON callback triggered")
         set_config("volume", slider.get_value())
         set_config("save_path", textinput.get_text())
         save_config()
         if notify_text_fn:
             notify_text_fn("Settings saved successfully!", duration=1.5)
-        original_callback()
+        original_callback(1.5)
     print("Auto save complete!")
+    print("[DEBUG] notify_text_fn =", notify_text_fn)
     return callback
 
 def make_config_save_file():

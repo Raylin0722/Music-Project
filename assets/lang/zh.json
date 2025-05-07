@@ -7,5 +7,19 @@
     "input_screen": "輸入頁面",
 	"startTitle": "音樂專題",
 	"volume": "音量",
-	"savePath": "儲存路徑"
+	"save_path": "儲存路徑",
+    "select_function": "請選擇功能", 
+    "MIDI_player": "MIDI 播放器",
+    "piano_simulator": "鋼琴模擬器",
+    "random_generator": "隨機生成",
+    "composition_feature": "編曲功能",
+    "select_midi": "選擇 MIDI 檔案",
+    "play": "播放",
+    "pause": "暫停",
+    "next": "下一個",
+    "stop": "停止",
+    "file_loaded": "檔案已載入",
+    "no_file_selected": "未選擇檔案"
+    
+
 }

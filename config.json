@@ -1,6 +1,6 @@
 {
-  "volume": 50,
-  "save_path": "./output",
+  "volume": 54,
+  "save_path": "./output/test",
   "width": 800,
   "height": 600,
   "fullscreen": false

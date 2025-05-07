@@ -4,7 +4,10 @@ from font_manager import FontManager
 import lang_manager
 from screens.start_screen import StartScreen
 from screens.settings_screen import SettingsScreen
+from screens.input_screen import InputScreen
+from screens.midi_load_screen import MidiLoadScreen
 import config_manager
+
 
 pygame.init()
 SCREEN_WIDTH, SCREEN_HEIGHT = 800, 600
@@ -15,48 +18,75 @@ clock = pygame.time.Clock()
 # 初始化字型管理與畫面狀態
 font = FontManager()
 current_screen = None
-
-# 畫面切換邏輯
+screens_cache = {
+    "start": None,
+    "settings": None,
+    "input": None,
+    "midi": None,
+    "piano": None
+}
 def switch_to_start():
     global current_screen
-
-    # 若從設定畫面回來，儲存目前設定
-    if isinstance(current_screen, SettingsScreen):
-        settings = current_screen.get_settings()
-        config_manager.set_config("volume", settings["volume"])
-        config_manager.set_config("save_path", settings["save_path"])
-        config_manager.save_config()
-        config_manager.apply_config()
-
-    current_screen = StartScreen(
-        font.get(lang_manager.LANGUAGE),
-        switch_to_input,
-        switch_to_settings,
-        set_language_and_refresh
-    )
-
-    print("目前音量：", config_manager.get_config("volume"))
-    print("目前存檔路徑：", config_manager.get_config("save_path"))
+    if not screens_cache["start"]:
+        screens_cache["start"] = StartScreen(
+            font.get(lang_manager.LANGUAGE),
+            switch_to_input,
+            switch_to_settings,
+            set_language_and_refresh
+        )
+    current_screen = screens_cache["start"]
 
 def switch_to_input():
-    print("切換至輸入畫面（待擴充）")
+    global current_screen
+    if not screens_cache["input"]:
+        screens_cache["input"] = InputScreen(
+            font.get(lang_manager.LANGUAGE),
+            switch_to_midi,
+            switch_to_piano,
+            switch_to_mood,
+            switch_to_composer,
+            switch_to_start
+        )
+    current_screen = screens_cache["input"]
 
-# 當語言切換後要重建畫面
-def set_language_and_refresh():
-    print("當前的LANGUAGE為: ", lang_manager.LANGUAGE)
-    lang_manager.set_language()
-    switch_to_start()
-    print("語言已切換至: ", lang_manager.LANGUAGE)
-    
-    
 def switch_to_settings():
     global current_screen
-    current_screen = SettingsScreen(
-        font.get(lang_manager.LANGUAGE),
-        switch_to_start
-    )
+    if not screens_cache["settings"]:
+        screens_cache["settings"] = SettingsScreen(
+            font.get(lang_manager.LANGUAGE),
+            switch_to_start
+        )
+    current_screen = screens_cache["settings"]
+
+def set_language_and_refresh():
+    lang_manager.set_language()
+    for k in screens_cache:
+        screens_cache[k] = None
+    
+    switch_to_start()
+
+def switch_to_midi():
+    global current_screen
+    if not screens_cache["midi"]:
+        
+        screens_cache["midi"] = MidiLoadScreen(
+            font.get(lang_manager.LANGUAGE),
+            switch_to_composer,
+            switch_to_input
+        )
+    current_screen = screens_cache["midi"]
+
+def switch_to_piano():
+    print("[TODO] 切換到 鋼琴模擬器畫面")
+
+def switch_to_mood():
+    print("[TODO] 切換到 隨機生成畫面")
+
+def switch_to_composer():
+    print("[TODO] 切換到 編曲畫面")
 
 # 啟動第一個畫面
+config_manager.load_config()
 switch_to_start()
 
 # 主迴圈
