@@ -10,7 +10,7 @@ class MidiLoadScreen(Screen):
         super().__init__()
         self.font = font
         self.on_next = on_next  # 進入編輯畫面 callback（會接收 midi_path）
-        self.on_back = on_back
+        self._on_back_raw = on_back
         self.midi_path = None
         self.status_text = lang_manager.translate("no_file_selected")
         self.is_playing = False
@@ -20,7 +20,7 @@ class MidiLoadScreen(Screen):
         self.play_pause_button = Button(lang_manager.translate("play"), center_x - 200, 170, 190, 50, self.toggle_play_pause, font)
         self.stop_button = Button(lang_manager.translate("stop"), center_x + 10, 170, 190, 50, self.stop_midi, font)
         self.next_button = Button(lang_manager.translate("next"), center_x - 200, 250, 400, 50, self.next_step, font)
-        self.back_button = Button(lang_manager.translate("back"), center_x - 200, 320, 400, 50, on_back, font)
+        self.back_button = Button(lang_manager.translate("back"), center_x - 200, 320, 400, 50, self.back_with_stop, font)
 
         self.buttons = [
             self.select_button,
@@ -39,29 +39,41 @@ class MidiLoadScreen(Screen):
 
     def toggle_play_pause(self):
         if not self.midi_path:
-            pass
+            return
         if not self.is_playing:
-            # pygame.mixer.music.load(self.midi_path)
-            # pygame.mixer.music.play()
-            self.status_text = lang_manager.translate("play")
+            if pygame.mixer.music.get_pos() > 0:
+                pygame.mixer.music.unpause()
+            else:
+                pygame.mixer.music.load(self.midi_path)
+                pygame.mixer.music.play()
+            self.status_text = lang_manager.translate("playing")
             self.play_pause_button.text = lang_manager.translate("pause")
             self.is_playing = True
         else:
-            # pygame.mixer.music.pause()
-            self.status_text = lang_manager.translate("pause")
+            pygame.mixer.music.pause()
+            self.status_text = lang_manager.translate("paused")
             self.play_pause_button.text = lang_manager.translate("play")
             self.is_playing = False
 
     def stop_midi(self):
-        # pygame.mixer.music.stop()
-        self.status_text = lang_manager.translate("stop")
+        pygame.mixer.music.stop()
+        self.status_text = lang_manager.translate("stopped")
         self.play_pause_button.text = lang_manager.translate("play")
         self.is_playing = False
 
     def next_step(self):
-        
+        print("change to composer")
         if self.midi_path:
+            self.stop_midi()
             self.on_next(self.midi_path)
+
+    def back_with_stop(self):
+        self.stop_midi()
+        self.midi_path = None
+        self.status_text = lang_manager.translate("no_file_selected")
+        self.play_pause_button.text = lang_manager.translate("play")
+        self.is_playing = False
+        self._on_back_raw()
 
     def handle_event(self, event):
         for b in self.buttons:

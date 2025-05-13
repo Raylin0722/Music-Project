@@ -19,7 +19,9 @@
     "next": "下一個",
     "stop": "停止",
     "file_loaded": "檔案已載入",
-    "no_file_selected": "未選擇檔案"
-    
+    "no_file_selected": "未選擇檔案",
+    "track": "音軌",
+    "no_track": "無音軌",
+    "midi_composer": "MIDI 編輯器"
 
 }

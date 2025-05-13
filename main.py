@@ -6,6 +6,7 @@ from screens.start_screen import StartScreen
 from screens.settings_screen import SettingsScreen
 from screens.input_screen import InputScreen
 from screens.midi_load_screen import MidiLoadScreen
+from screens.midi_composer_screen import MidiComposerScreen
 import config_manager
 
 
@@ -23,7 +24,8 @@ screens_cache = {
     "settings": None,
     "input": None,
     "midi": None,
-    "piano": None
+    "piano": None,
+    "composer": None
 }
 def switch_to_start():
     global current_screen
@@ -41,7 +43,7 @@ def switch_to_input():
     if not screens_cache["input"]:
         screens_cache["input"] = InputScreen(
             font.get(lang_manager.LANGUAGE),
-            switch_to_midi,
+            switch_to_midi_load,
             switch_to_piano,
             switch_to_mood,
             switch_to_composer,
@@ -65,10 +67,9 @@ def set_language_and_refresh():
     
     switch_to_start()
 
-def switch_to_midi():
+def switch_to_midi_load():
     global current_screen
     if not screens_cache["midi"]:
-        
         screens_cache["midi"] = MidiLoadScreen(
             font.get(lang_manager.LANGUAGE),
             switch_to_composer,
@@ -82,8 +83,16 @@ def switch_to_piano():
 def switch_to_mood():
     print("[TODO] 切換到 隨機生成畫面")
 
-def switch_to_composer():
-    print("[TODO] 切換到 編曲畫面")
+def switch_to_composer(midi_path):
+    global current_screen
+    screens_cache["composer"] = MidiComposerScreen(
+        font.get(lang_manager.LANGUAGE),
+        midi_path,
+        switch_to_input
+    )
+    current_screen = screens_cache["composer"]
+
+
 
 # 啟動第一個畫面
 config_manager.load_config()

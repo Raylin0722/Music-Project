@@ -19,6 +19,9 @@
     "stop": "Stop",
     "next": "Next",
     "file_loaded": "File loaded",
-    "no_file_selected": "No file selected"
+    "no_file_selected": "No file selected",
+    "track": "Track",
+    "no_track": "No track",
+    "midi_composer": "MIDI Composer"
 }
   
