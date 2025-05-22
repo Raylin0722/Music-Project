@@ -9,11 +9,10 @@ class InputScreen(Screen):
         super().__init__()
         self.font = font
         self.buttons = [
-            Button(lang_manager.translate("MIDI_player"), 200, 120, 400, 50, switch_to_midi, font),
-            Button(lang_manager.translate("piano_simulator"), 200, 190, 400, 50, switch_to_piano, font),
-            Button(lang_manager.translate("random_generator"), 200, 260, 400, 50, switch_to_mood, font),
-            Button(lang_manager.translate("composition_feature"), 200, 330, 400, 50, switch_to_composer, font),
-            Button(lang_manager.translate("back"), 300, 420, 200, 50, switch_to_start, font)
+            Button(lang_manager.translate("MIDI_player"), 200, 150, 400, 50, switch_to_midi, font),
+            Button(lang_manager.translate("piano_simulator"), 200, 225, 400, 50, switch_to_piano, font),
+            Button(lang_manager.translate("composition_feature"), 200, 295, 400, 50, switch_to_composer, font),
+            Button(lang_manager.translate("back"), 300, 380, 200, 50, switch_to_start, font)
         ]
 
     def handle_event(self, event):

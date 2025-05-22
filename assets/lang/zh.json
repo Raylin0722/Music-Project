@@ -22,6 +22,14 @@
     "no_file_selected": "未選擇檔案",
     "track": "音軌",
     "no_track": "無音軌",
-    "midi_composer": "MIDI 編輯器"
-
+    "midi_composer": "MIDI 編輯器",
+    "piano_simulator_title": "鋼琴模擬器",
+    "current_range": "當前音域：",
+    "currently_playing": "目前播放：",
+    "record": "錄音",
+    "hint_zx_switch": "使用 Z/X 切換八度音域。",
+    "hint_keys_note": "使用 A~K 和 WERTY 彈奏音符。",
+    "hint_click_record": "點擊錄音可開始/停止錄音。",
+    "rest_mode_on": "開啟",
+    "rest_mode_off": "關閉"
 }

@@ -6,7 +6,9 @@ from screens.start_screen import StartScreen
 from screens.settings_screen import SettingsScreen
 from screens.input_screen import InputScreen
 from screens.midi_load_screen import MidiLoadScreen
-from screens.midi_composer_screen import MidiComposerScreen
+#from screens.midi_composer_screen import MidiComposerScreen
+from screens.piano_settings_screen import PianoSettingsScreen
+from screens.piano_screen import PianoScreen
 import config_manager
 
 
@@ -25,7 +27,8 @@ screens_cache = {
     "input": None,
     "midi": None,
     "piano": None,
-    "composer": None
+    "composer": None,
+    "piano_settings": None
 }
 def switch_to_start():
     global current_screen
@@ -77,21 +80,36 @@ def switch_to_midi_load():
         )
     current_screen = screens_cache["midi"]
 
-def switch_to_piano():
-    print("[TODO] 切換到 鋼琴模擬器畫面")
 
-def switch_to_mood():
-    print("[TODO] 切換到 隨機生成畫面")
+def switch_to_piano():
+    global current_screen
+    if not screens_cache["piano"]:
+        screens_cache["piano"] = PianoScreen(
+            font.get(lang_manager.LANGUAGE),
+            switch_to_input,            
+            switch_to_piano_settings
+        )
+    current_screen = screens_cache["piano"]
+def switch_to_piano_settings():
+    global current_screen
+    if not screens_cache["piano_settings"]:
+        screens_cache["piano_settings"] = PianoSettingsScreen(
+            font.get(lang_manager.LANGUAGE),
+            switch_to_piano,        # 返回 piano 畫面
+        )
+    current_screen = screens_cache["piano_settings"]
 
 def switch_to_composer(midi_path):
-    global current_screen
-    screens_cache["composer"] = MidiComposerScreen(
-        font.get(lang_manager.LANGUAGE),
-        midi_path,
-        switch_to_input
-    )
-    current_screen = screens_cache["composer"]
-
+    # global current_screen
+    # screens_cache["composer"] = MidiComposerScreen(
+    #     font.get(lang_manager.LANGUAGE),
+    #     midi_path,
+    #     switch_to_input
+    # )
+    # current_screen = screens_cache["composer"]
+    pass
+def switch_to_mood():
+    pass
 
 
 # 啟動第一個畫面

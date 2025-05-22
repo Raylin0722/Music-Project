@@ -12,7 +12,7 @@ class StartScreen(Screen):
         self.buttons = [
             Button(lang_manager.translate("start"), 300, 300, 200, 60, switch_to_input, font),
             Button(lang_manager.translate("settings"), 300, 380, 200, 50, switch_to_settings, font),
-            Button(lang_manager.translate("langToggle"), 700, 520, 40, 40, set_lang, font, "assets/Picture/langBtn.png"),
+            Button(lang_manager.translate("langToggle"), 700, 520, 40, 40, set_lang, font, "assets/picture/langBtn.png"),
         ]
     def handle_event(self, event):
         for b in self.buttons:

@@ -22,6 +22,15 @@
     "no_file_selected": "No file selected",
     "track": "Track",
     "no_track": "No track",
-    "midi_composer": "MIDI Composer"
+    "midi_composer": "MIDI Composer",
+    "piano_simulator_title": "Piano Simulator",
+    "current_range": "Current range:",
+    "currently_playing": "Now playing:",
+    "record": "Record",
+    "hint_zx_switch": "Use Z/X to switch octaves.",
+    "hint_keys_note": "Use A~K and WERTY to play notes.",
+    "hint_click_record": "Click Record to start/stop recording.",
+    "rest_mode_on": "ON",
+    "rest_mode_off": "OFF"
 }
   
