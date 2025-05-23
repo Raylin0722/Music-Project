@@ -2,6 +2,8 @@ import pygame
 import fluidsynth
 import time
 import lang_manager, config_manager
+import mido
+import os
 
 from screens.screen_base import Screen
 
@@ -47,7 +49,7 @@ class PianoScreen(Screen):
         self.buttons = [
             Button(lang_manager.translate("back"), 30, 30, 50, 50, on_back, font, 'assets/picture/back.png'),
             Button(lang_manager.translate("record"), 670, 30, 50, 50, self.toggle_recording, font, 'assets/picture/record.png'),
-            Button(lang_manager.translate("settings"), 720, 30, 50, 50, on_settings, font, 'assets/picture/settings.png')
+            Button(lang_manager.translate("settings"), 720, 30, 50, 50, self.on_settings_clicked, font, 'assets/picture/settings.png')
         ]
 
     def toggle_recording(self):
@@ -59,6 +61,46 @@ class PianoScreen(Screen):
             print("🔴 Recording started")
         else:
             print("⏹ Recording stopped")
+
+    def on_settings_clicked(self):
+        # 關閉錄音
+        if self.recording:
+            self.toggle_recording()
+        # 轉成 MIDI 並存檔
+        midi_path = self.save_recorded_notes_to_midi()
+        print(f"[DEBUG] MIDI saved to {midi_path}")
+        # 顯示下載按鈕
+        self.show_download_button = True
+        self.midi_download_path = midi_path
+        # 跳轉到設定畫面
+        self.on_settings()
+
+    def save_recorded_notes_to_midi(self, filename=None):
+        mid = mido.MidiFile()
+        track = mido.MidiTrack()
+        mid.tracks.append(track)
+        tempo = mido.bpm2tempo(120)
+        track.append(mido.MetaMessage('set_tempo', tempo=tempo))
+        last_tick = 0
+        ticks_per_beat = mid.ticks_per_beat
+        for rec in self.recorded_notes:
+            if rec['key'] == 'rest':
+                # 休止符只加延遲
+                rest_ticks = int((rec['duration']) * ticks_per_beat)
+                last_tick += rest_ticks
+                continue
+            start_tick = int(rec['start'] * ticks_per_beat)
+            end_tick = int(rec['end'] * ticks_per_beat)
+            # note_on
+            track.append(mido.Message('note_on', note=rec['note'], velocity=64, time=start_tick - last_tick))
+            # note_off
+            track.append(mido.Message('note_off', note=rec['note'], velocity=64, time=end_tick - start_tick))
+            last_tick = end_tick
+        if not filename:
+            filename = f"record_{int(time.time())}.mid"
+        midi_path = os.path.join(os.getcwd(), filename)
+        mid.save(midi_path)
+        return midi_path
 
     def handle_event(self, event):
         for b in self.buttons:
@@ -134,8 +176,25 @@ class PianoScreen(Screen):
                             break
 
         # 自動補休止符
-        
-        
+        if self.recording and self.rest_recording_mode:
+            # 找出上一個 note 的結束時間
+            last_end = 0.0
+            for rec in reversed(self.recorded_notes):
+                if rec['end'] is not None:
+                    last_end = rec['end']
+                    break
+            # 如果目前沒有任何按鍵按下，且距離上一個 note 結束超過 1 秒
+            if not new_active_notes and (now - self.record_start_time - last_end) > 1.0:
+                rest_start = last_end
+                rest_end = now - self.record_start_time
+                print(f"[DEBUG] 休止: start={rest_start:.3f}s, end={rest_end:.3f}s, duration={rest_end - rest_start:.3f}s")
+                self.recorded_notes.append({
+                    'key': 'rest',
+                    'note': None,
+                    'start': rest_start,
+                    'end': rest_end,
+                    'duration': rest_end - rest_start
+                })
 
         self.active_notes = {k: (note, now) for k, note in new_active_notes.items()}
         
@@ -208,3 +267,7 @@ class PianoScreen(Screen):
 
         for b in self.buttons:
             b.draw(screen)
+        # 顯示下載按鈕
+        if hasattr(self, 'show_download_button') and self.show_download_button:
+            download_btn = Button('Download MIDI', 300, 30, 150, 50, lambda: os.system(f'open "{self.midi_download_path}"'), self.font)
+            download_btn.draw(screen)
