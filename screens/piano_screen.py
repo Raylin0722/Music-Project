@@ -59,19 +59,19 @@ class PianoScreen(Screen):
             self.recorded_notes = []
             self.last_record_time = 0.0
             print("🔴 Recording started")
+            self.show_download_button = False  # 關閉錄音時隱藏下載按鈕
         else:
             print("⏹ Recording stopped")
+            # 錄音結束時自動產生 MIDI 檔並顯示下載按鈕
+            midi_path = self.save_recorded_notes_to_midi()
+            print(f"[DEBUG] MIDI saved to {midi_path}")
+            self.show_download_button = True
+            self.midi_download_path = midi_path
 
     def on_settings_clicked(self):
         # 關閉錄音
         if self.recording:
             self.toggle_recording()
-        # 轉成 MIDI 並存檔
-        midi_path = self.save_recorded_notes_to_midi()
-        print(f"[DEBUG] MIDI saved to {midi_path}")
-        # 顯示下載按鈕
-        self.show_download_button = True
-        self.midi_download_path = midi_path
         # 跳轉到設定畫面
         self.on_settings()
 
@@ -209,6 +209,7 @@ class PianoScreen(Screen):
         return f"{names[midi_num % 12]}{(midi_num // 12) - 1}"
 
     def draw(self, screen):
+        from ui import Button
         screen.fill((255, 255, 255))
         screen_width = screen.get_width()
         screen_height = screen.get_height()
@@ -267,7 +268,11 @@ class PianoScreen(Screen):
 
         for b in self.buttons:
             b.draw(screen)
-        # 顯示下載按鈕
+        # 顯示下載按鈕（僅在錄音結束後）
         if hasattr(self, 'show_download_button') and self.show_download_button:
-            download_btn = Button('Download MIDI', 300, 30, 150, 50, lambda: os.system(f'open "{self.midi_download_path}"'), self.font)
+            download_btn = Button('Download MIDI', 300, 30, 150, 50, self.download_midi_file, self.font)
             download_btn.draw(screen)
+
+    def download_midi_file(self):
+        if hasattr(self, 'midi_download_path'):
+            os.system(f'open "{self.midi_download_path}"')
