@@ -268,11 +268,25 @@ class PianoScreen(Screen):
 
         for b in self.buttons:
             b.draw(screen)
-        # 顯示下載按鈕（僅在錄音結束後）
+        # 顯示下載按鈕（僅在錄音結束後，且在record/settings按鈕下方）
         if hasattr(self, 'show_download_button') and self.show_download_button:
-            download_btn = Button('Download MIDI', 300, 30, 150, 50, self.download_midi_file, self.font)
+            # 取得 record 與 settings 按鈕的 y 座標與高度
+            record_btn = self.buttons[1]
+            settings_btn = self.buttons[2]
+            btn_y = max(record_btn.y + record_btn.height, settings_btn.y + settings_btn.height) + 10
+            download_btn = Button('Download MIDI', 670, btn_y, 150, 50, self.download_midi_file, self.font)
             download_btn.draw(screen)
+            # 顯示提示訊息
+            if hasattr(self, 'download_message') and self.download_message:
+                msg = self.font.render(self.download_message, True, (200, 50, 50))
+                screen.blit(msg, (670, btn_y + 60))
 
     def download_midi_file(self):
         if hasattr(self, 'midi_download_path'):
-            os.system(f'open "{self.midi_download_path}"')
+            ret = os.system(f'open "{self.midi_download_path}"')
+            if ret == 0:
+                self.download_message = 'MIDI 檔案已開啟/下載'
+            else:
+                self.download_message = '無法開啟 MIDI 檔案，請手動到專案資料夾下載'
+        else:
+            self.download_message = '找不到 MIDI 檔案路徑'
