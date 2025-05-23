@@ -39,8 +39,9 @@ class PianoScreen(Screen):
         self.active_notes = {}
         self.recording = False
         self.record_start_time = None
-        self.recorded_notes = []
+        self.recorded_notes = {}
         self.rest_recording_mode = config_manager.get_config("rest_mode")
+        self.last_record_time = 0.0
 
         from ui import Button
         self.buttons = [
@@ -109,7 +110,7 @@ class PianoScreen(Screen):
                 self.last_record_time = now_offset
 
         self.active_notes = {k: (note, now) for k, note in new_active_notes.items()}
-
+        
     
     def shift_octave(self, direction):
         new_base = self.base_note + direction * 12
