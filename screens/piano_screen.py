@@ -81,21 +81,37 @@ class PianoScreen(Screen):
         mid.tracks.append(track)
         tempo = mido.bpm2tempo(120)
         track.append(mido.MetaMessage('set_tempo', tempo=tempo))
-        last_tick = 0
         ticks_per_beat = mid.ticks_per_beat
+        events = []
         for rec in self.recorded_notes:
             if rec['key'] == 'rest':
-                # 休止符只加延遲
-                rest_ticks = int((rec['duration']) * ticks_per_beat)
-                last_tick += rest_ticks
+                # 休止符不產生事件，只靠 tick 差
                 continue
             start_tick = int(rec['start'] * ticks_per_beat)
             end_tick = int(rec['end'] * ticks_per_beat)
-            # note_on
-            track.append(mido.Message('note_on', note=rec['note'], velocity=64, time=start_tick - last_tick))
-            # note_off
-            track.append(mido.Message('note_off', note=rec['note'], velocity=64, time=end_tick - start_tick))
-            last_tick = end_tick
+            events.append({'tick': start_tick, 'type': 'on', 'note': rec['note']})
+            events.append({'tick': end_tick, 'type': 'off', 'note': rec['note']})
+        # 加入休止符事件（只為了 tick 排序，不產生 MIDI 事件）
+        for rec in self.recorded_notes:
+            if rec['key'] == 'rest':
+                # 只為了讓 tick 排序正確
+                events.append({'tick': int(rec['start'] * ticks_per_beat), 'type': 'rest_start'})
+                events.append({'tick': int(rec['end'] * ticks_per_beat), 'type': 'rest_end'})
+        # 依 tick 排序，on > off > rest_start > rest_end 保證同 tick 先 note_on
+        type_order = {'on': 0, 'off': 1, 'rest_start': 2, 'rest_end': 3}
+        events.sort(key=lambda e: (e['tick'], type_order.get(e['type'], 99)))
+        last_tick = 0
+        for e in events:
+            delta = e['tick'] - last_tick
+            if e['type'] == 'on':
+                track.append(mido.Message('note_on', note=e['note'], velocity=64, time=delta))
+                last_tick = e['tick']
+            elif e['type'] == 'off':
+                track.append(mido.Message('note_off', note=e['note'], velocity=64, time=delta))
+                last_tick = e['tick']
+            else:
+                # rest_start/rest_end 只更新 last_tick，不產生 MIDI 事件
+                last_tick = e['tick']
         if not filename:
             filename = f"record_{int(time.time())}.mid"
         midi_path = os.path.join(os.getcwd(), filename)
