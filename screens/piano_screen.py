@@ -39,7 +39,7 @@ class PianoScreen(Screen):
         self.active_notes = {}
         self.recording = False
         self.record_start_time = None
-        self.recorded_notes = {}
+        self.recorded_notes = []
         self.rest_recording_mode = config_manager.get_config("rest_mode")
         self.last_record_time = 0.0
 
@@ -54,7 +54,7 @@ class PianoScreen(Screen):
         self.recording = not self.recording
         if self.recording:
             self.record_start_time = time.time()
-            self.recorded_notes.clear()
+            self.recorded_notes = []
             self.last_record_time = 0.0
             print("🔴 Recording started")
         else:
@@ -83,8 +83,26 @@ class PianoScreen(Screen):
                     self.fs.noteon(0, note, 100)
                     if self.recording:
                         played_now.append(note)
+                        rel_start = now - self.record_start_time
+                        print(f"[DEBUG] 按下: key={k}, note={note}, time={now:.3f}s, rel_start={rel_start:.3f}s")
+                        self.recorded_notes.append({
+                            'key': k,
+                            'note': note,
+                            'start': rel_start,
+                            'end': None,
+                            'duration': None
+                        })
             elif k in self.active_notes:
                 self.fs.noteoff(0, self.active_notes[k][0])
+                if self.recording:
+                    rel_end = now - self.record_start_time
+                    for rec in reversed(self.recorded_notes):
+                        if rec['key'] == k and rec['end'] is None:
+                            rec['end'] = rel_end
+                            rec['duration'] = rec['end'] - rec['start']
+                            print(f"[DEBUG] 放開: key={k}, note={note}, time={now:.3f}s, rel_end={rel_end:.3f}s")
+                            print(f"[DEBUG] 當前所有recorded_notes: {self.recorded_notes}")
+                            break
 
         for i, k in enumerate(BLACK_KEYS):
             note = self.base_note + BLACK_OFFSETS[i]
@@ -94,20 +112,30 @@ class PianoScreen(Screen):
                     self.fs.noteon(0, note, 100)
                     if self.recording:
                         played_now.append(note)
+                        rel_start = now - self.record_start_time
+                        print(f"[DEBUG] 按下: key={k}, note={note}, time={now:.3f}s, rel_start={rel_start:.3f}s")
+                        self.recorded_notes.append({
+                            'key': k,
+                            'note': note,
+                            'start': rel_start,
+                            'end': None,
+                            'duration': None
+                        })
             elif k in self.active_notes:
                 self.fs.noteoff(0, self.active_notes[k][0])
+                if self.recording:
+                    rel_end = now - self.record_start_time
+                    for rec in reversed(self.recorded_notes):
+                        if rec['key'] == k and rec['end'] is None:
+                            rec['end'] = rel_end
+                            rec['duration'] = rec['end'] - rec['start']
+                            print(f"[DEBUG] 放開: key={k}, note={note}, time={now:.3f}s, rel_end={rel_end:.3f}s")
+                            print(f"[DEBUG] 當前所有recorded_notes: {self.recorded_notes}")
+                            break
 
         # 自動補休止符
-        if self.recording:
-            now_offset = now - self.record_start_time
-            if hasattr(self, 'last_record_time'):
-                gap = now_offset - self.last_record_time
-                if gap > 0.2 and len(played_now) > 0 and self.rest_recording_mode:
-                    self.recorded_notes.append({"note": "rest", "start": self.last_record_time, "duration": gap})
-            if played_now:
-                for n in played_now:
-                    self.recorded_notes.append({"note": n, "start": now_offset, "duration": 0.5})
-                self.last_record_time = now_offset
+        
+        
 
         self.active_notes = {k: (note, now) for k, note in new_active_notes.items()}
         
