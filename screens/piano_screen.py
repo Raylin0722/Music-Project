@@ -81,8 +81,8 @@ class PianoScreen(Screen):
         mid.tracks.append(track)
         tempo = mido.bpm2tempo(120)
         track.append(mido.MetaMessage('set_tempo', tempo=tempo))
-        last_tick = 0
         ticks_per_beat = mid.ticks_per_beat
+        events = []
         for rec in self.recorded_notes:
             if rec['key'] == 'rest':
                 rest_ticks = int((rec['duration']) * ticks_per_beat)
