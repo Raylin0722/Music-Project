@@ -63,10 +63,10 @@ class PianoScreen(Screen):
         else:
             print("⏹ Recording stopped")
             # 錄音結束時自動產生 MIDI 檔並顯示下載按鈕
-            midi_path = self.save_recorded_notes_to_midi()
-            print(f"[DEBUG] MIDI saved to {midi_path}")
+            # midi_path = self.save_recorded_notes_to_midi()
+            print(f"Wait for download btn click")
             self.show_download_button = True
-            self.midi_download_path = midi_path
+            self.midi_download_path = None
 
     def on_settings_clicked(self):
         # 關閉錄音
@@ -85,22 +85,20 @@ class PianoScreen(Screen):
         ticks_per_beat = mid.ticks_per_beat
         for rec in self.recorded_notes:
             if rec['key'] == 'rest':
-                # 休止符只加延遲
                 rest_ticks = int((rec['duration']) * ticks_per_beat)
                 last_tick += rest_ticks
                 continue
-            start_tick = int(rec['start'] * ticks_per_beat)
-            end_tick = int(rec['end'] * ticks_per_beat)
-            # note_on
-            track.append(mido.Message('note_on', note=rec['note'], velocity=64, time=start_tick - last_tick))
-            # note_off
-            track.append(mido.Message('note_off', note=rec['note'], velocity=64, time=end_tick - start_tick))
+            start_tick = max(0, int(rec['start'] * ticks_per_beat))
+            end_tick = max(start_tick, int(rec['end'] * ticks_per_beat))
+            track.append(mido.Message('note_on', note=rec['note'], velocity=64, time=max(0, start_tick - last_tick)))
+            track.append(mido.Message('note_off', note=rec['note'], velocity=64, time=max(0, end_tick - start_tick)))
             last_tick = end_tick
         if not filename:
             filename = f"record_{int(time.time())}.mid"
         midi_path = os.path.join(os.getcwd(), filename)
         mid.save(midi_path)
         return midi_path
+
 
     def handle_event(self, event):
         for b in self.buttons:
@@ -214,6 +212,18 @@ class PianoScreen(Screen):
         screen_width = screen.get_width()
         screen_height = screen.get_height()
         margin = 30
+        
+        if getattr(self, "notice_text", None):
+            if time.time() - self.notice_start_time < self.notice_duration:
+                box_rect = pygame.Rect(0, 0, screen.get_width(), 40)
+                pygame.draw.rect(screen, (200, 255, 200), box_rect)
+                pygame.draw.line(screen, (0, 180, 0), (0, 40), (screen.get_width(), 40), 2)
+
+                notice = self.font.render(self.notice_text, True, (0, 100, 0))
+                text_rect = notice.get_rect(center=(screen.get_width() // 2, 20))
+                screen.blit(notice, text_rect)
+            else:
+                self.notice_text = None
 
         total_white_keys = len(WHITE_KEYS)
         key_width = (screen_width - 2 * margin) // total_white_keys
@@ -273,20 +283,38 @@ class PianoScreen(Screen):
             # 取得 record 與 settings 按鈕的 y 座標與高度
             record_btn = self.buttons[1]
             settings_btn = self.buttons[2]
-            btn_y = max(record_btn.y + record_btn.height, settings_btn.y + settings_btn.height) + 10
-            download_btn = Button('Download MIDI', 670, btn_y, 150, 50, self.download_midi_file, self.font)
+            download_btn = Button(lang_manager.translate('downloadMidiBtn'), 700, 80, 50, 50, self.download_midi_file_and_notice(self.delayed_back, self.show_notice), self.font, 'assets/picture/download.png')
             download_btn.draw(screen)
+            self.buttons.append(download_btn)
             # 顯示提示訊息
             if hasattr(self, 'download_message') and self.download_message:
                 msg = self.font.render(self.download_message, True, (200, 50, 50))
-                screen.blit(msg, (670, btn_y + 60))
+                screen.blit(msg, (670, 150 + 60))
 
     def download_midi_file(self):
-        if hasattr(self, 'midi_download_path'):
-            ret = os.system(f'open "{self.midi_download_path}"')
-            if ret == 0:
-                self.download_message = 'MIDI 檔案已開啟/下載'
-            else:
-                self.download_message = '無法開啟 MIDI 檔案，請手動到專案資料夾下載'
+        if not self.midi_download_path:
+            self.midi_download_path = self.save_recorded_notes_to_midi()
+        ret = os.system(f'open "{self.midi_download_path}"')
+        if ret == 0:
+            self.download_message = 'MIDI 檔案已開啟/下載'
         else:
-            self.download_message = '找不到 MIDI 檔案路徑'
+            self.download_message = '無法開啟 MIDI 檔案，請手動到專案資料夾下載'
+    def show_notice(self, text, duration=1.5):
+        print("show notice!")
+        self.notice_text = text
+        self.notice_start_time = time.time()
+        self.notice_duration = duration
+    def delayed_back(self, delay_seconds):
+        self._return_after = time.time() + delay_seconds
+
+    def download_midi_file_and_notice(self, original_callback, notify_text_fn=None):
+        
+        def callback():
+            if notify_text_fn:
+                notify_text_fn("Settings saved successfully!", duration=1.5)
+            self.download_midi_file()
+            original_callback(1.5)
+            print("[DEBUG] download_midi_file_and_notice BUTTON callback triggered")
+            print("[DEBUG] download_midi_file CALLED")
+        
+        return callback
