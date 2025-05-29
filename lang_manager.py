@@ -9,7 +9,7 @@ path_manager = PathManager()
 def load_language(lang_code):
     try:
         # 使用 path_manager 獲取正確的文件路徑
-        file_path = os.path.join(path_manager.lang_path, f"{lang_code}.json")
+        file_path = path_manager.get_path("lang", f"{lang_code}.json")
         print(f"嘗試載入語言檔案: {file_path}")
         
         with open(file_path, encoding="utf-8") as f:

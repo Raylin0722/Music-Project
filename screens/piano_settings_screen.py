@@ -25,7 +25,7 @@ class PianoSettingsScreen(Screen):
             lang_manager.translate("hint_keys_note"),
             lang_manager.translate("hint_click_record")
         ]
-        self.back_btn = Button( lang_manager.translate("back"), 30, 30, 50, 50, config_manager.make_auto_save_back_piano(self.delayed_back, self.volume_slider, self.current_mode, self.show_notice), font, 'assets/picture/back.png')
+        self.back_btn = Button( lang_manager.translate("back"), 30, 30, 50, 50, config_manager.make_auto_save_back_piano(self.delayed_back, self.volume_slider, self.current_mode, self.show_notice), font, 'back.png')
         self.buttons.append(self.back_btn)
 
     def handle_event(self, event):

@@ -49,9 +49,9 @@ class PianoScreen(Screen):
 
         from ui import Button
         self.buttons = [
-            Button(lang_manager.translate("back"), 30, 30, 50, 50, on_back, font, 'assets/picture/back.png'),
-            Button(lang_manager.translate("record"), 670, 30, 50, 50, self.toggle_recording, font, 'assets/picture/record.png'),
-            Button(lang_manager.translate("settings"), 720, 30, 50, 50, self.on_settings_clicked, font, 'assets/picture/settings.png')
+            Button(lang_manager.translate("back"), 30, 30, 50, 50, on_back, font, 'back.png'),
+            Button(lang_manager.translate("record"), 670, 30, 50, 50, self.toggle_recording, font, 'record.png'),
+            Button(lang_manager.translate("settings"), 720, 30, 50, 50, self.on_settings_clicked, font, 'settings.png')
         ]
 
     def toggle_recording(self):
@@ -108,7 +108,7 @@ class PianoScreen(Screen):
             
         if not filename:
             filename = f"record_{int(time.time())}.mid"
-        midi_path = os.path.join(path_manager.tmp_path, filename)
+        midi_path = os.path.join(path_manager.base_path, filename)
         mid.save(midi_path)
         return midi_path
 
@@ -299,7 +299,7 @@ class PianoScreen(Screen):
             # 取得 record 與 settings 按鈕的 y 座標與高度
             record_btn = self.buttons[1]
             settings_btn = self.buttons[2]
-            download_btn = Button(lang_manager.translate('downloadMidiBtn'), 700, 80, 50, 50, self.download_midi_file_and_notice(self.delayed_back, self.show_notice), self.font, 'assets/picture/download.png')
+            download_btn = Button(lang_manager.translate('downloadMidiBtn'), 700, 80, 50, 50, self.download_midi_file_and_notice(self.delayed_back, self.show_notice), self.font, 'download.png')
             download_btn.draw(screen)
             self.buttons.append(download_btn)
             # 顯示提示訊息
@@ -310,7 +310,7 @@ class PianoScreen(Screen):
     def download_midi_file(self):
         if not self.midi_download_path:
             self.midi_download_path = self.save_recorded_notes_to_midi()
-        
+        print(f"[DEBUG] MIDI file saved to: {self.midi_download_path}")
         # 改為簡短提示，不顯示下載路徑
         self.download_message = lang_manager.translate("download_complete")
         self.midi_ready_to_open = True

@@ -19,8 +19,19 @@ class PathManager:
         self.screens_path = os.path.join(self.base_path, "screens")
         self.fluidsynth_path = os.path.join(self.base_path, "fluidsynth")
         self.tmp_path = os.path.join(self.base_path, "tmp")
-        self.musescore_path = os.path.join(self.base_path, "MuseScorePortable", "MuseScorePortable.exe")
+        self.musescore_path = os.path.join(self.base_path, "MuseScorePortable", "App", "MuseScore", "bin", "MuseScore4.exe")
         
+        self.path = {
+            "base": self.base_path,
+            "assets": self.assets_path,
+            "lang": self.lang_path,
+            "sounds": self.sounds_path,
+            "pictures": self.pictures_path,
+            "screens": self.screens_path,
+            "fluidsynth": self.fluidsynth_path,
+            "tmp": self.tmp_path,
+            "musescore": self.musescore_path
+        }
         # 輸出診斷信息
         self.print_paths()
         
@@ -77,6 +88,11 @@ class PathManager:
     def get_asset(self, relative_path):
         """獲取相對於資源資料夾的完整路徑"""
         return os.path.join(self.assets_path, relative_path)
+    
+    def get_path(self, key, path):
+        """獲取指定鍵的完整路徑"""
+        return os.path.join(self.path.get(key, None), path)
+
 
 # 創建全域實例
 path_manager = PathManager()

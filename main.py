@@ -148,7 +148,7 @@ def check_environment():
     print("==========================\n")
 
 # 在程式開始時執行
-check_environment()
+# check_environment()
 config_manager.load_config()
 switch_to_start()
 

@@ -1,5 +1,6 @@
 # ui.py - UI 元件：Button, TextInput, Slider
 import pygame
+from path_manager import path_manager
 
 class Button:
     def __init__(self, text, x, y, width, height, callback, font, image_path=None):
@@ -9,7 +10,8 @@ class Button:
         self.font = font
         self.image = None
         if image_path:
-            self.image = pygame.image.load(image_path)
+            real_path = path_manager.get_path("pictures", image_path)
+            self.image = pygame.image.load(real_path)
             self.image = pygame.transform.scale(self.image, (width, height))
 
     def draw(self, screen):

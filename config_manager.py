@@ -1,9 +1,10 @@
 # config_manager.py
 import json
 import os
+from path_manager import path_manager
 
-CONFIG_FILE = "config.json"
-
+CONFIG_FILE = path_manager.get_path("base", "config.json")
+print("[DEBUG] CONFIG_FILE =", CONFIG_FILE)
 default_config = {
     "volume": 50,
     "save_path": "./output",

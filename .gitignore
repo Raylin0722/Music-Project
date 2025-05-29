@@ -1,0 +1,9 @@
+.vscode/
+music-env/
+venv/
+env/
+ENV/
+*.mid
+build/
+dist/
+MoodComposer.spec
