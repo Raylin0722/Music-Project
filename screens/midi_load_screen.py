@@ -3,7 +3,7 @@ import os
 from tkinter import filedialog, Tk
 from screens.screen_base import Screen
 from ui import Button
-import lang_manager
+import lang_manager, config_manager
 
 class MidiLoadScreen(Screen):
     def __init__(self, font, on_next, on_back):
@@ -14,6 +14,7 @@ class MidiLoadScreen(Screen):
         self.midi_path = None
         self.status_text = lang_manager.translate("no_file_selected")
         self.is_playing = False
+        self.volume = 0.5  # 預設音量
 
         center_x = 800 // 2
         self.select_button = Button(lang_manager.translate("select_midi"), center_x - 200, 180, 400, 50, self.load_file, font)
@@ -35,7 +36,8 @@ class MidiLoadScreen(Screen):
         if path:
             self.midi_path = path
             self.status_text = f"{lang_manager.translate('file_loaded')}: {os.path.basename(path)}"
-
+            self.volume = config_manager.get_config("volume") / 100.0
+            pygame.mixer.music.set_volume(self.volume)
     def toggle_play_pause(self):
         if not self.midi_path:
             return

@@ -46,6 +46,9 @@ class PianoScreen(Screen):
         self.recorded_notes = []
         self.rest_recording_mode = config_manager.get_config("rest_mode")
         self.last_record_time = 0.0
+        self.volume = config_manager.get_config("volume") / 100.0  # 初始音量 (範圍 0.0 ~ 1.0)
+        self.fs.setting("synth.gain", self.volume)
+
 
         from ui import Button
         self.buttons = [
@@ -136,6 +139,8 @@ class PianoScreen(Screen):
             if keys[getattr(pygame, f'K_{k}')]:
                 new_active_notes[k] = note
                 if k not in self.active_notes:
+                    self.volume= config_manager.get_config("volume") / 100.0
+                    self.fs.setting("synth.gain", self.volume) 
                     self.fs.noteon(0, note, 100)
                     if self.recording:
                         played_now.append(note)
