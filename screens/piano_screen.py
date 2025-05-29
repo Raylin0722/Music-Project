@@ -6,6 +6,7 @@ import mido
 import os
 
 from screens.screen_base import Screen
+from path_manager import path_manager  # 這樣導入的是模組中的實例
 
 WHITE_KEYS = ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k']
 BLACK_KEYS = ['w', 'e', 'r', 't', 'y']
@@ -34,7 +35,8 @@ class PianoScreen(Screen):
 
         self.fs = fluidsynth.Synth()
         self.fs.start()
-        self.sfid = self.fs.sfload("assets/sounds/Antares_SoundFont.sf2")
+        sf2_path = path_manager.get_asset("sounds/Antares_SoundFont.sf2")
+        self.sfid = self.fs.sfload(sf2_path)
         self.fs.program_select(0, self.sfid, 0, 0)
 
         self.base_note = 60  # C4
@@ -79,23 +81,34 @@ class PianoScreen(Screen):
         mid = mido.MidiFile()
         track = mido.MidiTrack()
         mid.tracks.append(track)
-        tempo = mido.bpm2tempo(120)
+        tempo = mido.bpm2tempo(144)
         track.append(mido.MetaMessage('set_tempo', tempo=tempo))
         ticks_per_beat = mid.ticks_per_beat
         events = []
+        
+        last_tick = 0
+        
         for rec in self.recorded_notes:
             if rec['key'] == 'rest':
                 rest_ticks = int((rec['duration']) * ticks_per_beat)
                 last_tick += rest_ticks
                 continue
+                
+            # 加入這段處理 None 的代碼
+            if rec['end'] is None:
+                # 如果結束時間是 None，設定為開始時間 + 1秒
+                rec['end'] = rec['start'] + 1.0
+                rec['duration'] = 1.0
+                
             start_tick = max(0, int(rec['start'] * ticks_per_beat))
             end_tick = max(start_tick, int(rec['end'] * ticks_per_beat))
             track.append(mido.Message('note_on', note=rec['note'], velocity=64, time=max(0, start_tick - last_tick)))
             track.append(mido.Message('note_off', note=rec['note'], velocity=64, time=max(0, end_tick - start_tick)))
             last_tick = end_tick
+            
         if not filename:
             filename = f"record_{int(time.time())}.mid"
-        midi_path = os.path.join(os.getcwd(), filename)
+        midi_path = os.path.join(path_manager.tmp_path, filename)
         mid.save(midi_path)
         return midi_path
 
@@ -108,6 +121,9 @@ class PianoScreen(Screen):
                 self.shift_octave(-1)
             elif event.key == pygame.K_x:
                 self.shift_octave(1)
+            elif event.key == pygame.K_o:  # 新增: 按下 O 鍵打開檔案
+                if hasattr(self, "midi_ready_to_open") and self.midi_ready_to_open:
+                    self.open_midi_file()
 
     def update(self, dt):
         now = time.time()
@@ -289,16 +305,19 @@ class PianoScreen(Screen):
             # 顯示提示訊息
             if hasattr(self, 'download_message') and self.download_message:
                 msg = self.font.render(self.download_message, True, (200, 50, 50))
-                screen.blit(msg, (670, 150 + 60))
+                screen.blit(msg, (30, 180))
 
     def download_midi_file(self):
         if not self.midi_download_path:
             self.midi_download_path = self.save_recorded_notes_to_midi()
-        ret = os.system(f'open "{self.midi_download_path}"')
-        if ret == 0:
-            self.download_message = 'MIDI 檔案已開啟/下載'
-        else:
-            self.download_message = '無法開啟 MIDI 檔案，請手動到專案資料夾下載'
+        
+        # 改為簡短提示，不顯示下載路徑
+        self.download_message = lang_manager.translate("download_complete")
+        self.midi_ready_to_open = True
+        
+        # 仍然保留按 O 開啟的提示
+        self.download_message += lang_manager.translate("press_o_to_open")
+
     def show_notice(self, text, duration=1.5):
         print("show notice!")
         self.notice_text = text
@@ -311,10 +330,40 @@ class PianoScreen(Screen):
         
         def callback():
             if notify_text_fn:
-                notify_text_fn("Settings saved successfully!", duration=1.5)
+                notify_text_fn(lang_manager.translate("download_success"), duration=1.5)
             self.download_midi_file()
             original_callback(1.5)
             print("[DEBUG] download_midi_file_and_notice BUTTON callback triggered")
             print("[DEBUG] download_midi_file CALLED")
         
         return callback
+
+    def open_midi_file(self):
+        """使用預設應用程式開啟 MIDI 檔案"""
+        if not hasattr(self, "midi_download_path") or not self.midi_download_path:
+            return
+            
+        try:
+            # 根據不同作業系統使用不同命令開啟檔案
+            import platform
+            system = platform.system()
+            
+            if system == 'Windows':
+                import os
+                os.startfile(self.midi_download_path)
+                success = True
+            elif system == 'Darwin':  # macOS
+                ret = os.system(f'open "{self.midi_download_path}"')
+                success = (ret == 0)
+            else:  # Linux 或其他
+                ret = os.system(f'xdg-open "{self.midi_download_path}"')
+                success = (ret == 0)
+                
+            if success:
+                self.show_notice(lang_manager.translate("midi_opened"))
+            else:
+                self.show_notice(lang_manager.translate("cannot_open_file"))
+                    
+        except Exception as e:
+            print(f"開啟檔案時發生錯誤: {e}")
+            self.show_notice(lang_manager.translate("error_opening_file"))

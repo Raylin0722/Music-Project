@@ -7,6 +7,7 @@ from screens.settings_screen import SettingsScreen
 from screens.input_screen import InputScreen
 from screens.midi_load_screen import MidiLoadScreen
 #from screens.midi_composer_screen import MidiComposerScreen
+from screens.midi_editor_screen import MidiEditorScreen
 from screens.piano_settings_screen import PianoSettingsScreen
 from screens.piano_screen import PianoScreen
 import config_manager
@@ -27,7 +28,7 @@ screens_cache = {
     "input": None,
     "midi": None,
     "piano": None,
-    "composer": None,
+    "editor": None,
     "piano_settings": None
 }
 def switch_to_start():
@@ -49,7 +50,7 @@ def switch_to_input():
             switch_to_midi_load,
             switch_to_piano,
             switch_to_mood,
-            switch_to_composer,
+            switch_to_editor,  
             switch_to_start
         )
     current_screen = screens_cache["input"]
@@ -101,18 +102,53 @@ def switch_to_piano_settings():
 
 def switch_to_composer(midi_path):
     # global current_screen
-    # screens_cache["composer"] = MidiComposerScreen(
-    #     font.get(lang_manager.LANGUAGE),
-    #     midi_path,
-    #     switch_to_input
-    # )
+    # if not screens_cache['composer']:
+    #     screens_cache["composer"] = MidiComposerScreen(
+    #         font.get(lang_manager.LANGUAGE),
+    #         midi_path,
+    #         switch_to_input
+    #     )
     # current_screen = screens_cache["composer"]
+    pass
+
+def switch_to_editor():
+    global current_screen
+    if not screens_cache['editor']:
+        screens_cache["editor"] = MidiEditorScreen(
+            font.get(lang_manager.LANGUAGE),
+            switch_to_input
+        )
+    current_screen = screens_cache["editor"]
     pass
 def switch_to_mood():
     pass
 
 
-# 啟動第一個畫面
+# 檢查環境並輸出診斷信息
+def check_environment():
+    import sys
+    import os
+    
+    print("\n======== 環境診斷 ========")
+    print(f"Python 版本: {sys.version}")
+    print(f"執行模式: {'打包環境' if getattr(sys, 'frozen', False) else '開發環境'}")
+    
+    if getattr(sys, 'frozen', False):
+        print(f"臨時目錄: {sys._MEIPASS}")
+        print("\n關鍵目錄:")
+        for dir_name in ["assets", "assets/lang", "assets/sounds", "fluidsynth"]:
+            path = os.path.join(sys._MEIPASS, dir_name)
+            if os.path.exists(path):
+                print(f"- {dir_name}: 存在")
+                if dir_name == "assets/lang":
+                    print(f"  語言檔案: {os.listdir(path)}")
+            else:
+                print(f"- {dir_name}: 不存在!")
+    
+    print("==========================\n")
+
+# 在程式開始時執行
+check_environment()
 config_manager.load_config()
 switch_to_start()
 

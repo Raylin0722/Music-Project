@@ -16,17 +16,16 @@ class MidiLoadScreen(Screen):
         self.is_playing = False
 
         center_x = 800 // 2
-        self.select_button = Button(lang_manager.translate("select_midi"), center_x - 200, 100, 400, 50, self.load_file, font)
-        self.play_pause_button = Button(lang_manager.translate("play"), center_x - 200, 170, 190, 50, self.toggle_play_pause, font)
-        self.stop_button = Button(lang_manager.translate("stop"), center_x + 10, 170, 190, 50, self.stop_midi, font)
-        self.next_button = Button(lang_manager.translate("next"), center_x - 200, 250, 400, 50, self.next_step, font)
+        self.select_button = Button(lang_manager.translate("select_midi"), center_x - 200, 180, 400, 50, self.load_file, font)
+        self.play_pause_button = Button(lang_manager.translate("play"), center_x - 200, 250, 190, 50, self.toggle_play_pause, font)
+        self.stop_button = Button(lang_manager.translate("stop"), center_x + 10, 250, 190, 50, self.stop_midi, font)
+        self.next_button = Button(lang_manager.translate("next"), center_x - 200, 280, 400, 50, self.next_step, font)
         self.back_button = Button(lang_manager.translate("back"), center_x - 200, 320, 400, 50, self.back_with_stop, font)
 
         self.buttons = [
             self.select_button,
             self.play_pause_button,
             self.stop_button,
-            self.next_button,
             self.back_button
         ]
 

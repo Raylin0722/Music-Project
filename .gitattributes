@@ -1,2 +1,37 @@
-# Auto detect text files and perform LF normalization
-* text=auto
+# 虛擬環境
+music-env/
+venv/
+env/
+ENV/
+
+# VS Code 設定
+.vscode/
+*.code-workspace
+
+# Python 暫存檔案
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.pytest_cache/
+.coverage
+htmlcov/
+
+# PyInstaller 輸出
+build/
+dist/
+*.spec
+
+# 日誌文件
+*.log
+logs/
+
+# 臨時文件
+tmp/
+temp/
+.DS_Store
+
+# 環境設定檔
+.env
+.env.local
