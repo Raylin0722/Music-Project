@@ -6,4 +6,6 @@ ENV/
 *.mid
 build/
 dist/
-MoodComposer.spec
+*.spec
+tmp/
+__pycache__/

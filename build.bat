@@ -1,5 +1,4 @@
 @echo off
-ECHO === 直接使用虛擬環境中的可執行檔 ===
 
 REM 設定虛擬環境路徑
 SET VENV_PATH=%CD%\music-env\Scripts
@@ -18,16 +17,15 @@ echo Using virtual environment Python:
 "%VENV_PYTHON%" -c "import sys; print('Python path:', sys.executable)"
 
 REM 使用虛擬環境的 PyInstaller 執行打包
-ECHO 開始使用虛擬環境打包...
 "%VENV_PYINSTALLER%" --onefile ^
-  --console ^
-  --name "MoodComposer" ^
-  --debug=all ^
+  --noconsole ^
+  --name "MidiComposer" ^
   --add-data "screens;screens" ^
   --add-data "assets;assets" ^
   --add-data "MuseScorePortable;MuseScorePortable" ^
   --add-data "fluidsynth;fluidsynth" ^
   --add-data "tmp;tmp" ^
+  --icon "app_icon.ico" ^
   main.py
 
 ECHO === Success ===

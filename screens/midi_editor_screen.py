@@ -6,6 +6,7 @@ import lang_manager
 from config_manager import get_config
 import subprocess
 import re
+from path_manager import path_manager
 
 def get_unique_filename(folder, base_name, ext):
     """
@@ -387,7 +388,7 @@ class MidiEditorScreen(Screen):
     def generate_score_image(self):
         xml_path = self.export_to_musicxml()
         png_path = os.path.join("tmp", "score.png")
-        musescore_path = r"MuseScorePortable\App\MuseScore\bin\MuseScore4.exe"  # 請依你的安裝路徑調整
+        musescore_path = path_manager.musescore_path
         subprocess.run([musescore_path, xml_path, "-o", png_path])
         # 處理 MuseScore 可能產生 score-1.png 的情況
         png1_path = os.path.join("tmp", "score-1.png")
